@@ -50,6 +50,15 @@ namespace NRedisStack
                 args.Add(TimeSeriesArgs.UNCOMPRESSED);
             }
         }
+        public static void AddIgnoreValues(this IList<object> args, long? ignoreMaxTimeDiff, long? ignoreMaxValDiff)
+        {
+            if (ignoreMaxTimeDiff != null || ignoreMaxValDiff != null)
+            {
+                args.Add(TimeSeriesArgs.VALUES);
+                args.Add(ignoreMaxTimeDiff ?? 0);
+                args.Add(ignoreMaxValDiff ?? 0);
+            }
+        }
 
         public static void AddCount(this IList<object> args, long? count)
         {
@@ -213,7 +222,7 @@ namespace NRedisStack
         }
 
         public static List<object> BuildTsCreateArgs(string key, long? retentionTime, IReadOnlyCollection<TimeSeriesLabel>? labels, bool? uncompressed,
-            long? chunkSizeBytes, TsDuplicatePolicy? policy)
+            long? chunkSizeBytes, TsDuplicatePolicy? policy, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = new List<object> { key };
             args.AddRetentionTime(retentionTime);
@@ -221,22 +230,25 @@ namespace NRedisStack
             args.AddLabels(labels);
             args.AddUncompressed(uncompressed);
             args.AddDuplicatePolicy(policy);
+            args.AddIgnoreValues(ignoreMaxTimeDiff, ignoreMaxValDiff);
             return args;
         }
 
         public static List<object> BuildTsAlterArgs(string key, long? retentionTime, long? chunkSizeBytes,
-                                         TsDuplicatePolicy? policy, IReadOnlyCollection<TimeSeriesLabel>? labels)
+                                         TsDuplicatePolicy? policy, IReadOnlyCollection<TimeSeriesLabel>? labels, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = new List<object> { key };
             args.AddRetentionTime(retentionTime);
             args.AddChunkSize(chunkSizeBytes);
             args.AddDuplicatePolicy(policy);
             args.AddLabels(labels);
+            args.AddIgnoreValues(ignoreMaxTimeDiff, ignoreMaxValDiff);
+
             return args;
         }
 
         public static List<object> BuildTsAddArgs(string key, TimeStamp timestamp, double value, long? retentionTime,
-            IReadOnlyCollection<TimeSeriesLabel>? labels, bool? uncompressed, long? chunkSizeBytes, TsDuplicatePolicy? policy)
+            IReadOnlyCollection<TimeSeriesLabel>? labels, bool? uncompressed, long? chunkSizeBytes, TsDuplicatePolicy? policy, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = new List<object> { key, timestamp.Value, value };
             args.AddRetentionTime(retentionTime);
@@ -244,11 +256,13 @@ namespace NRedisStack
             args.AddLabels(labels);
             args.AddUncompressed(uncompressed);
             args.AddOnDuplicate(policy);
+            args.AddIgnoreValues(ignoreMaxTimeDiff, ignoreMaxValDiff);
+
             return args;
         }
 
         public static List<object> BuildTsIncrDecrByArgs(string key, double value, TimeStamp? timestampMaybe, long? retentionTime,
-            IReadOnlyCollection<TimeSeriesLabel>? labels, bool? uncompressed, long? chunkSizeBytes)
+            IReadOnlyCollection<TimeSeriesLabel>? labels, bool? uncompressed, long? chunkSizeBytes, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = new List<object> { key, value };
             if (timestampMaybe is { } timestamp) args.AddTimeStamp(timestamp);
@@ -256,6 +270,7 @@ namespace NRedisStack
             args.AddChunkSize(chunkSizeBytes);
             if (labels != null) args.AddLabels(labels);
             args.AddUncompressed(uncompressed);
+            args.AddIgnoreValues(ignoreMaxTimeDiff, ignoreMaxValDiff);
             return args;
         }
 

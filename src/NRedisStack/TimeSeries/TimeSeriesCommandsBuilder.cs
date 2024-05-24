@@ -9,7 +9,7 @@ namespace NRedisStack
     {
         #region Create
 
-        public static SerializedCommand Create(string key, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null)
+        public static SerializedCommand Create(string key, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = TimeSeriesAux.BuildTsCreateArgs(key, retentionTime, labels, uncompressed, chunkSizeBytes, duplicatePolicy);
             return new SerializedCommand(TS.CREATE, args);
@@ -19,7 +19,7 @@ namespace NRedisStack
 
         #region Update
 
-        public static SerializedCommand Alter(string key, long? retentionTime = null, long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null)
+        public static SerializedCommand Alter(string key, long? retentionTime = null, long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = TimeSeriesAux.BuildTsAlterArgs(key, retentionTime, chunkSizeBytes, duplicatePolicy, labels);
             return new SerializedCommand(TS.ALTER, args);
@@ -27,7 +27,7 @@ namespace NRedisStack
 
         public static SerializedCommand Add(string key, TimeStamp timestamp, double value, long? retentionTime = null,
         IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null,
-        long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null)
+        long? chunkSizeBytes = null, TsDuplicatePolicy? duplicatePolicy = null, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = TimeSeriesAux.BuildTsAddArgs(key, timestamp, value, retentionTime, labels, uncompressed, chunkSizeBytes, duplicatePolicy);
             return new SerializedCommand(TS.ADD, args);
@@ -39,13 +39,13 @@ namespace NRedisStack
             return new SerializedCommand(TS.MADD, args);
         }
 
-        public static SerializedCommand IncrBy(string key, double value, TimeStamp? timestamp = null, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null)
+        public static SerializedCommand IncrBy(string key, double value, TimeStamp? timestamp = null, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = TimeSeriesAux.BuildTsIncrDecrByArgs(key, value, timestamp, retentionTime, labels, uncompressed, chunkSizeBytes);
             return new SerializedCommand(TS.INCRBY, args);
         }
 
-        public static SerializedCommand DecrBy(string key, double value, TimeStamp? timestamp = null, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null)
+        public static SerializedCommand DecrBy(string key, double value, TimeStamp? timestamp = null, long? retentionTime = null, IReadOnlyCollection<TimeSeriesLabel>? labels = null, bool? uncompressed = null, long? chunkSizeBytes = null, long? ignoreMaxTimeDiff = null, long? ignoreMaxValDiff = null)
         {
             var args = TimeSeriesAux.BuildTsIncrDecrByArgs(key, value, timestamp, retentionTime, labels, uncompressed, chunkSizeBytes);
             return (new SerializedCommand(TS.DECRBY, args));
