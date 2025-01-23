@@ -154,6 +154,7 @@ namespace NRedisStack
         /// <inheritdoc/>
         public Tuple<SearchResult, Dictionary<string, RedisResult>> ProfileSearch(string indexName, Query q, bool limited = false)
         {
+            setDefaultDialectIfUnset(q);
             return _db.Execute(SearchCommandBuilder.ProfileSearch(indexName, q, limited))
                             .ToProfileSearchResult(q);
         }
