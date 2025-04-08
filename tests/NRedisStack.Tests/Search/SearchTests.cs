@@ -3495,8 +3495,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         else if (docs[0].GetProperties().Count() == 0)
                         {
                             droppedDocument = docs[0];
-                            Interlocked.Increment(ref completed);
-                            break;
+                            // Interlocked.Increment(ref completed);
+                            // break;
                         }
                         else
                         {
@@ -3527,7 +3527,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Assert.Equal(3, started);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
-            cancelled = true;
+            // cancelled = true;
+
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
         // it is not guaranteed that window stays open wide enough to catch it.
