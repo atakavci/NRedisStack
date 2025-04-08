@@ -3496,8 +3496,10 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Assert.Equal(0, keyTtl.HasValue ? keyTtl.Value.Milliseconds : 0);
             Assert.Equal(3, completed);
         } while (droppedDocument == null && numberOfAttempts++ < 5);
-        // we wont do an actual assert here since 
+        // we won't do an actual assert here since 
         // it is not guaranteed that window stays open wide enough to catch it.
-        // instead we attempt 5 times 
+        // instead we attempt 5 times.
+        // Without fix for Issue352 , document load fails %100 with my local test runs,, and %100 success with fixed version.
+        // The results in pipeline might become complete different story..
     }
 }
