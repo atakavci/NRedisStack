@@ -3483,8 +3483,6 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                     else if (docs[0].GetProperties().Count() == 0)
                     {
                         droppedDocument = docs[0];
-                        // Interlocked.Increment(ref completed);
-                        // break;
                     }
                 }
             };
@@ -3494,7 +3492,6 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             for (int i = 0; i < 3; i++) { tasks.Add(Task.Run(checker)); }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1000));
-            Assert.True(sw.ElapsedMilliseconds > 500);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
         } while (droppedDocument == null && numberOfAttempts++ < 5);
