@@ -3520,14 +3520,14 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                 tasks.Add(Task.Run(checker));
             }
             Task checkTask = Task.WhenAll(tasks);
-            await Task.WhenAny(checkTask, Task.Delay(1500));
+            await Task.WhenAny(checkTask, Task.Delay(1000));
             Assert.Equal(null, id);
             Assert.Equal(0, exception);
             Assert.Equal(0, serverSideDiscrepency);
             Assert.Equal(3, started);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
-            // cancelled = true;
+            cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
         // it is not guaranteed that window stays open wide enough to catch it.
