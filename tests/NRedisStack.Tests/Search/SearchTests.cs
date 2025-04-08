@@ -3463,13 +3463,20 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             } while (!ttlRefreshed);
 
             Boolean cancelled = false;
+            Int32 serverSideDiscrepency = 0;
             Action checker = () =>
             {
                 Interlocked.Increment(ref started);
                 for (int i = 0; i < 1000000 && !cancelled; i++)
                 {
+                    bool exists = db.KeyExists("student:1111");
                     SearchResult result = ft.Search(index, new Query());
                     List<Document> docs = result.Documents;
+                    if (!exists && docs.Count != 0)
+                    {
+                        Interlocked.Increment(ref serverSideDiscrepency);
+                    }
+
                     // check if doc is already dropped before search and load;
                     // if yes then its already late and we missed the window that 
                     // doc would show up in search result with no fields 
@@ -3498,7 +3505,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1500));
-            Assert.Equal(3, started);
+            Assert.Equal(0, serverSideDiscrepency);
+            Assert.Equal(3 + 2, started + 2);
             Assert.Equal(3, completed);
             cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
