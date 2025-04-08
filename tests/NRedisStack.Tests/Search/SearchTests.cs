@@ -3464,6 +3464,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
 
             Boolean cancelled = false;
             Int32 serverSideDiscrepency = 0;
+            string id = null;
             Action checker = () =>
             {
                 Interlocked.Increment(ref started);
@@ -3494,6 +3495,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         Interlocked.Increment(ref completed);
                         break;
                     }
+                    id = docs[0].Id == "student:1111" ? null : docs[0].Id;
                 }
             };
 
@@ -3505,6 +3507,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1500));
+            Assert.Equal(null, id);
             Assert.Equal(0, serverSideDiscrepency);
             Assert.Equal(3 + 2, started + 2);
             Assert.Equal(3, completed);
