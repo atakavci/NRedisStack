@@ -8,6 +8,7 @@ using NRedisStack.Search.Literals.Enums;
 using System.Runtime.InteropServices;
 using NetTopologySuite.IO;
 using NetTopologySuite.Geometries;
+using System.Diagnostics;
 
 namespace NRedisStack.Tests.Search;
 
@@ -3459,6 +3460,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             } while (!ttlRefreshed);
 
             Int32 completed = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             Action checker = () =>
             {
                 for (int i = 0; i < 1000000; i++)
@@ -3475,13 +3478,13 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         break;
                     }
                     // if we get a document with no fields then we know that the key 
-                    // expired while the query is running, and we are able to catch the state
-                    // so we can break the loop
+                    // is going to be expired while the query is running, and we are able to catch the state
+                    // but key itself might not be expired yet
                     else if (docs[0].GetProperties().Count() == 0)
                     {
                         droppedDocument = docs[0];
-                        Interlocked.Increment(ref completed);
-                        break;
+                        // Interlocked.Increment(ref completed);
+                        // break;
                     }
                 }
             };
@@ -3491,6 +3494,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             for (int i = 0; i < 3; i++) { tasks.Add(Task.Run(checker)); }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1000));
+            Assert.True(sw.ElapsedMilliseconds > 500);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
         } while (droppedDocument == null && numberOfAttempts++ < 5);
