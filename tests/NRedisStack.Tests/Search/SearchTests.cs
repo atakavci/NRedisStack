@@ -3487,7 +3487,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         if (docs.Count == 0)
                         {
                             Interlocked.Increment(ref completed);
-                            // break;
+                            break;
                         }
                         // if we get a document with no fields then we know that the key 
                         // expired while the query is running, and we are able to catch the state
@@ -3496,7 +3496,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         {
                             droppedDocument = docs[0];
                             Interlocked.Increment(ref completed);
-                            // break;
+                            break;
                         }
                         else
                         {
