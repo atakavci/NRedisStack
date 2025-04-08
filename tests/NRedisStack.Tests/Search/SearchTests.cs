@@ -3454,6 +3454,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             // try until succesfully create the key and set the TTL
             bool ttlRefreshed = false;
             Int32 completed = 0;
+            Int32 started = 0;
 
             do
             {
@@ -3464,7 +3465,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Boolean cancelled = false;
             Action checker = () =>
             {
-                for (int i = 0; i < 100000 && !cancelled; i++)
+                Interlocked.Increment(ref started);
+                for (int i = 0; i < 1000000 && !cancelled; i++)
                 {
                     SearchResult result = ft.Search(index, new Query());
                     List<Document> docs = result.Documents;
@@ -3496,6 +3498,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1500));
+            Assert.Equal(3, started);
             Assert.Equal(3, completed);
             cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
