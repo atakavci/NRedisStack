@@ -3452,17 +3452,16 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
         {
             // try until succesfully create the key and set the TTL
             bool ttlRefreshed = false;
-            Int32 completed = 0;
             do
             {
                 db.HashSet("student:11112", new HashEntry[] { new("firsty", "Joe"), new("lasty", "Dod"), new("agey", 18) });
                 ttlRefreshed = db.KeyExpire("student:11112", TimeSpan.FromMilliseconds(500));
             } while (!ttlRefreshed);
 
-            Boolean cancelled = false;
+            Int32 completed = 0;
             Action checker = () =>
             {
-                for (int i = 0; i < 1000000 && !cancelled; i++)
+                for (int i = 0; i < 1000000; i++)
                 {
                     SearchResult result = ft.Search(index, new Query());
                     List<Document> docs = result.Documents;
@@ -3489,15 +3488,11 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
 
             List<Task> tasks = new List<Task>();
             // try with 3 different tasks simultaneously to increase the chance of hitting it
-            for (int i = 0; i < 3; i++)
-            {
-                tasks.Add(Task.Run(checker));
-            }
+            for (int i = 0; i < 3; i++) { tasks.Add(Task.Run(checker)); }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1000));
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
-            cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
         // it is not guaranteed that window stays open wide enough to catch it.
