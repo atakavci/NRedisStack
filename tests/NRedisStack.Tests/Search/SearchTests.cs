@@ -3443,7 +3443,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
         IDatabase db = GetCleanDatabase(endpointId);
         var ft = db.FT();
 
-        Schema sc = new Schema().AddTextField("first", 1.0).AddTextField("last", 1.0).AddNumericField("age");
+        Schema sc = new Schema().AddTextField("firsty", 1.0).AddTextField("lasty", 1.0).AddNumericField("agey");
         Assert.True(ft.Create(index, FTCreateParams.CreateParams(), sc));
 
         Document droppedDocument = null;
@@ -3458,8 +3458,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
 
             do
             {
-                db.HashSet("student:1111", new HashEntry[] { new("first", "Joe"), new("last", "Dod"), new("age", 18) });
-                ttlRefreshed = db.KeyExpire("student:1111", TimeSpan.FromMilliseconds(500));
+                db.HashSet("student:11112", new HashEntry[] { new("firsty", "Joe"), new("lasty", "Dod"), new("agey", 18) });
+                ttlRefreshed = db.KeyExpire("student:11112", TimeSpan.FromMilliseconds(500));
             } while (!ttlRefreshed);
 
             Boolean cancelled = false;
@@ -3470,7 +3470,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                 Interlocked.Increment(ref started);
                 for (int i = 0; i < 1000000 && !cancelled; i++)
                 {
-                    bool exists = db.KeyExists("student:1111");
+                    bool exists = db.KeyExists("student:11112");
                     SearchResult result = ft.Search(index, new Query());
                     List<Document> docs = result.Documents;
                     if (!exists && docs.Count != 0)
@@ -3495,7 +3495,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         Interlocked.Increment(ref completed);
                         break;
                     }
-                    id = docs[0].Id == "student:1111" ? null : docs[0].Id;
+                    id = docs[0].Id == "student:11112" ? null : docs[0].Id;
                 }
             };
 
