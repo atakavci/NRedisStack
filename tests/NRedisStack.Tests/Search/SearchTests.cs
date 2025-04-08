@@ -3519,6 +3519,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Assert.Equal(0, exception);
             Assert.Equal(0, serverSideDiscrepency);
             Assert.Equal(3 + 2, started + 2);
+            Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
             cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
