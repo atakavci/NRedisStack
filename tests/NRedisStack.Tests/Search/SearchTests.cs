@@ -3527,7 +3527,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Assert.Equal(3, started);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
-            // cancelled = true;
+            cancelled = true;
 
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
