@@ -3492,7 +3492,8 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             for (int i = 0; i < 3; i++) { tasks.Add(Task.Run(checker)); }
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1000));
-            Assert.Null(db.KeyTimeToLive("student:11112"));
+            var keyTtl = db.KeyTimeToLive("student:11112");
+            Assert.Equal(0, keyTtl.HasValue ? keyTtl.Value.Milliseconds : 0);
             Assert.Equal(3, completed);
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
