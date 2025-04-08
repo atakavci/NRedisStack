@@ -3455,6 +3455,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             bool ttlRefreshed = false;
             Int32 completed = 0;
             Int32 started = 0;
+            Int32 exception = 0;
 
             do
             {
@@ -3468,34 +3469,41 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Action checker = () =>
             {
                 Interlocked.Increment(ref started);
-                for (int i = 0; i < 1000000 && !cancelled; i++)
+                try
                 {
-                    bool exists = db.KeyExists("student:11112");
-                    SearchResult result = ft.Search(index, new Query());
-                    List<Document> docs = result.Documents;
-                    if (!exists && docs.Count != 0)
+                    for (int i = 0; i < 1000000 && !cancelled; i++)
                     {
-                        Interlocked.Increment(ref serverSideDiscrepency);
-                    }
+                        bool exists = db.KeyExists("student:11112");
+                        SearchResult result = ft.Search(index, new Query());
+                        List<Document> docs = result.Documents;
+                        if (!exists && docs.Count != 0)
+                        {
+                            Interlocked.Increment(ref serverSideDiscrepency);
+                        }
 
-                    // check if doc is already dropped before search and load;
-                    // if yes then its already late and we missed the window that 
-                    // doc would show up in search result with no fields 
-                    if (docs.Count == 0)
-                    {
-                        Interlocked.Increment(ref completed);
-                        break;
+                        // check if doc is already dropped before search and load;
+                        // if yes then its already late and we missed the window that 
+                        // doc would show up in search result with no fields 
+                        if (docs.Count == 0)
+                        {
+                            Interlocked.Increment(ref completed);
+                            break;
+                        }
+                        // if we get a document with no fields then we know that the key 
+                        // expired while the query is running, and we are able to catch the state
+                        // so we can break the loop
+                        else if (docs[0].GetProperties().Count() == 0)
+                        {
+                            droppedDocument = docs[0];
+                            Interlocked.Increment(ref completed);
+                            break;
+                        }
+                        id = docs[0].Id == "student:11112" ? null : docs[0].Id;
                     }
-                    // if we get a document with no fields then we know that the key 
-                    // expired while the query is running, and we are able to catch the state
-                    // so we can break the loop
-                    else if (docs[0].GetProperties().Count() == 0)
-                    {
-                        droppedDocument = docs[0];
-                        Interlocked.Increment(ref completed);
-                        break;
-                    }
-                    id = docs[0].Id == "student:11112" ? null : docs[0].Id;
+                }
+                catch (Exception e)
+                {
+                    Interlocked.Increment(ref exception);
                 }
             };
 
@@ -3508,6 +3516,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Task checkTask = Task.WhenAll(tasks);
             await Task.WhenAny(checkTask, Task.Delay(1500));
             Assert.Equal(null, id);
+            Assert.Equal(0, exception);
             Assert.Equal(0, serverSideDiscrepency);
             Assert.Equal(3 + 2, started + 2);
             Assert.Equal(3, completed);
