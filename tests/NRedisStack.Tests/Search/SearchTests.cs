@@ -3487,7 +3487,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         if (docs.Count == 0)
                         {
                             Interlocked.Increment(ref completed);
-                            break;
+                            // break;
                         }
                         // if we get a document with no fields then we know that the key 
                         // expired while the query is running, and we are able to catch the state
@@ -3496,9 +3496,12 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
                         {
                             droppedDocument = docs[0];
                             Interlocked.Increment(ref completed);
-                            break;
+                            // break;
                         }
-                        id = docs[0].Id == "student:11112" ? null : docs[0].Id;
+                        else
+                        {
+                            id = docs[0].Id == "student:11112" ? null : docs[0].Id;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -3521,7 +3524,7 @@ public class SearchTests : AbstractNRedisStackTest, IDisposable
             Assert.Equal(3, started);
             Assert.Null(db.KeyTimeToLive("student:11112"));
             Assert.Equal(3, completed);
-            cancelled = true;
+            // cancelled = true;
         } while (droppedDocument == null && numberOfAttempts++ < 5);
         // we wont do an actual assert here since 
         // it is not guaranteed that window stays open wide enough to catch it.
